@@ -1,0 +1,92 @@
+.lista-usuario {
+  padding: 20px;
+}
+
+table {
+  width: 100%; 
+  border-collapse: collapse; /*remove espaço das bordas*/
+}
+
+th, td {
+  padding: 10px; 
+  text-align: left; 
+  border-bottom: 1px solid #ccc; 
+}
+
+th {
+  background-color: #fff; 
+}
+
+tr:hover {
+  background-color: #f5f5f5; 
+}
+
+.icon{
+  width: 30px;
+}
+
+
+.ReactModal__Overlay {
+  background-color: rgba(0, 0, 0, 0.7); /* Fundo opaco mais forte */
+  position: fixed; 
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000; /* Garante que o modal esteja acima de outros conteúdos */
+}
+
+.ReactModal__Content {
+  width: 400px; 
+  max-width: 90%; 
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 1010; 
+  position: relative;
+}
+
+.modal-textarea {
+  width: 100%;
+  margin-bottom: 10px;
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.modal-buttons {
+  margin-top: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.modal-buttons button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.modal-buttons button:first-child {
+  background-color: #007BFF;
+  color: white;
+}
+
+.modal-buttons button:first-child:hover {
+  background-color: #0056b3;
+}
+
+.modal-buttons button:last-child {
+  background-color: #f44336;
+  color: white;
+}
+
+.modal-buttons button:last-child:hover {
+  background-color: #d32f2f;
+}
