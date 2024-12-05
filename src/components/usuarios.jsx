@@ -13,6 +13,7 @@ const Usuarios = ({ moderadorId }) => {
     useEffect(() => {
         const fetchUsuarios = async () => {
             try {
+                console.log(moderadorId)
                 const response = await fetch('https://volun-api-eight.vercel.app/usuarios/');
                 if (!response.ok) {
                     throw new Error('Erro ao buscar os usuários');
@@ -37,18 +38,16 @@ const Usuarios = ({ moderadorId }) => {
         return <div>Erro: {error}</div>;
     }
 
-
-
     const registrarAcao = async (acao, alvoId, alvoTipo, descricao) => {
         try {
             const response = await fetch('https://volun-api-eight.vercel.app/acoes-moderacao', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    moderador_id: 'nzzz6fDOI7UmFaelJuBUlBtJExd2',
-                    alvo_tipo: 'usuario',       // Tipo de alvo (ex.: "usuario")
-                    alvo_id: 'usuario_id',
-                    acao: 'excluir, advertir, suspender',
+                    moderador_id: moderadorId,
+                    alvo_tipo: alvoTipo,
+                    alvo_id: alvoId,
+                    acao: acao,
                     descricao: descricao,      
                     data: new Date().toISOString(), 
                 }),
@@ -61,24 +60,41 @@ const Usuarios = ({ moderadorId }) => {
             console.error('Erro ao registrar ação:', err);
         }
     };
-    
-
-
 
     const handleSuspender = async (usuario) => {
-        if (window.confirm(`Tem certeza que deseja suspender o usuário ${usuario.nome}?`)) {
-            const updatedUsuario = { ...usuario, status: 'suspenso' };
-            setUsuarios((prevUsuarios) =>
-                prevUsuarios.map((u) =>
-                    u._id === usuario._id ? updatedUsuario : u
-                )
-            );
-            await registrarAcao('suspender', usuario._id, 'usuario', `Usuário ${usuario.nome} suspenso`);
-
+        const action = usuario.userSuspenso ? 'reativar' : 'suspender';
+        if (window.confirm(`Tem certeza que deseja ${action} o usuário ${usuario.nome}?`)) {
+            try {
+                const response = await fetch(`https://volun-api-eight.vercel.app/usuarios/${usuario._id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userSuspenso: !usuario.userSuspenso }),
+                });
+    
+                if (!response.ok) {
+                    const errorMsg = await response.text();
+                    throw new Error(`Erro ao ${action} o usuário: ${errorMsg}`);
+                }
+    
+                const updatedUsuario = { ...usuario, userSuspenso: !usuario.userSuspenso };
+                setUsuarios((prevUsuarios) =>
+                    prevUsuarios.map((u) => (u._id === usuario._id ? updatedUsuario : u))
+                );
+    
+                await registrarAcao(
+                    action,
+                    usuario._id,
+                    'usuario',
+                    `Usuário ${usuario.nome} ${action === 'reativar' ? 'reativado' : 'suspenso'}`
+                );
+    
+                alert(`Usuário ${usuario.nome} foi ${action === 'reativar' ? 'reativado' : 'suspenso'} com sucesso.`);
+            } catch (err) {
+                console.error(`Erro ao ${action} usuário:`, err);
+                alert(`Erro ao ${action} usuário: ${err.message}`);
+            }
         }
     };
-
-
 
     const handleDelete = async (usuario) => {
         if (window.confirm(`Tem certeza que deseja excluir o usuário ${usuario.nome}?`)) {
@@ -102,8 +118,6 @@ const Usuarios = ({ moderadorId }) => {
         }
     };
 
-
-
     const handleAdvertir = (usuario) => {
         setSelectedUsuario(usuario);
         setIsModalOpen(true);
@@ -115,7 +129,6 @@ const Usuarios = ({ moderadorId }) => {
             return;
         }
         await registrarAcao('advertir', selectedUsuario._id, 'usuario', `Advertência aplicada: ${advertencia}`);
-        ;
         setIsModalOpen(false);
         setAdvertencia('');
     };
@@ -137,13 +150,13 @@ const Usuarios = ({ moderadorId }) => {
                 </thead>
                 <tbody>
                     {usuarios.map((usuario) => (
-                        <tr key={usuario._id} style={{ color: usuario.status === 'suspenso' ? 'red' : 'black' }}>
+                        <tr key={usuario._id} style={{ color: usuario.userSuspenso ? 'red' : 'black' }}>
                             <td>{usuario.nome}</td>
                             <td>{usuario.sobrenome}</td>
                             <td>{usuario.ddd}</td>
                             <td>{usuario.telefone}</td>
                             <td>{usuario.data_nascimento}</td>
-                            <td>{usuario.status === 'suspenso' ? 'Suspenso' : 'Ativo'}</td>
+                            <td>{usuario.userSuspenso ? 'Suspenso' : 'Ativo'}</td>
                             <td>
                                 <button onClick={() => handleDelete(usuario)}>
                                     Excluir
@@ -152,7 +165,7 @@ const Usuarios = ({ moderadorId }) => {
                                     Advertir
                                 </button>
                                 <button onClick={() => handleSuspender(usuario)}>
-                                    Suspender
+                                    {usuario.userSuspenso ? 'Reativar' : 'Suspender'}
                                 </button>
                             </td>
                         </tr>
